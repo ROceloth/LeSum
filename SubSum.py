@@ -13,42 +13,30 @@ def TRIM(L:list,d:float) -> list:
             last = L[i]
     return L2
 
-def MERGE_LIST(L1:list,L2:list) -> list:
+def MERGE_LIST3(L1:list,L2:list) -> list:
     """
-    Ya tu sabhe merge list
-    dos lista de enteros ordenadas
-    que se juntan, nota por el libro,
-    valores duplicado eliminados
+    El merge sin valores duplicados
     """
     Lz = []
-    n = len(L1) + len(L2)
-    x = 0
-    y = 0
-    for i in range(0,n):
-        if x == len(L1):
-            return list(set(Lz + L2[y:]))
+    x=0
+    y=0
 
-        if y == len(L2):
-            return list(set(Lz + L1[x:]))
-            
-        if L1[x] <= L2[y]:
+    while x < len(L1) and y < len(L2):
+        if L1[x] < L2[y]:
             Lz.append(L1[x])
-            x+=1
-        else:
+            x += 1
+        elif L1[x] == L2[y]:
+            y += 1
+        else: #L1[x] > L2[y]
             Lz.append(L2[y])
-            y+=1
-        
-    return list(set(Lz))
+            y += 1
 
-def MERGE_LIST2(L1:list,L2:list) -> list:
-    Lz = L1 + L2
-    Lz = set(Lz)
-    Lz = list(Lz)
-    Lz.sort()
+    if x == len(L1):
+        Lz = Lz + L2[y:]
+    else:
+        Lz = Lz + L1[x:]
+
     return Lz
-
-#print(MERGE_LIST2([0,14],[5,19])) esto porque tuve un conflicto con duplicados
-#es medio trampa
 
 def leSumL(L:list,x:int) -> list:
     """
@@ -85,9 +73,12 @@ def APPROX_SUBSET_SUM(S:list,t:int,e:int) -> list:
     n = len(S)
     L = [0] #L0
     for i in range(0,n):
-        L = MERGE_LIST2(L,leSumL(L,S[i]))
+        L = MERGE_LIST3(L,leSumL(L,S[i]))
+        print(L)
         L = TRIM(L,e/(2*n))
+        print(L)
         L = removeAllG(L,t)
+        print(L)
     z = L[-1] #por los merges el mas grande se encuentra al final
    
     return [z, L]
