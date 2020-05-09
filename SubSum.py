@@ -1,3 +1,5 @@
+A = {0:[0]} #el dict para recordar los caminos, empieza en 0 suma
+
 def TRIM(L:list,d:float) -> list:
     """
     Donde L tiene que estar ordenada en forma desc y 0<d<1
@@ -38,73 +40,84 @@ def MERGE_LIST3(L1:list,L2:list) -> list:
 
     return Lz
 
-def leSumL(L:list,x:int) -> list:
+#Remember lesumL
+def ReLeSumL(L:list,x:int) -> list:
     """
     el ya tu sabhe del libro de L+x
     L lista de enteros que a todo elemento de L
-    se le suma x
+    se le suma x, en L son keys de A las nuevas
+    a recordar
     """
+    global A
     Lx = []
-    for i in range(0,len(L)):
-      Lx.append(L[i]+x)
+    for i in L:
+        z = i+x
+        Lx.append(z)
+
+        if z not in A: #y que no actualize si no esta
+            A[z] = A[i] + [x]
 
     return Lx
 
-
-def removeAllG(L:list,x:int) -> list:
+#Actualiza removeAllG
+def A_removeAllG(L:list,x:int) -> list:
     """
     devulve una lista sin todas las ocurrencias de los
     elementos mayores a x conservando el orden relativo de los
-    elementos
+    elementos y tambien Actualiza a A para mantener las 
+    keys aun existentes de las L_i
     """
+    #Todo elemento de L es tambien una key de A
+    global A
     Lf = []
-    for i in range(0,len(L)):
-        if L[i] <= x:
-            Lf.append(L[i])
+    for i in L:
+        if i <= x:
+            Lf.append(i)
+        else:
+            A.pop(i)
 
     return Lf
 
 
-def APPROX_SUBSET_SUM(S:list,t:int,e:int) -> list:
+def APPROX_SUBSET_SUM(S:list,t:int,e:int) -> int:
     """
     algoritmo del libro [Thomas H. Cormen] Introduction to Algorithms
     recuperacion extra, ejercicio 35.5-5 (ya habra otra ocasion)
     """
+    global A
     n = len(S)
     L = [0] #L0
     for i in range(0,n):
-        L = MERGE_LIST3(L,leSumL(L,S[i]))
-        print(L)
+        L = MERGE_LIST3(L,ReLeSumL(L,S[i]))
+        #print(L)
         L = TRIM(L,e/(2*n))
-        print(L)
-        L = removeAllG(L,t)
-        print(L)
+        #print(L)
+        L = A_removeAllG(L,t)
+        #print(L)
+        #print(A)
+        #los debugers :v
     z = L[-1] #por los merges el mas grande se encuentra al final
-   
-    return [z, L]
+    #esta es la ultima clave que busco
+
+    return z
 
 
-def recuperarD(L:list) -> list:
+def recuperarD(z:int) -> list:
     #sospecho que L es la lista que provoca la suma de z sin L[-1] y L[0]
     #pero mejor, la idea esta en que la lista recuperada si contiene
     #los valores que provocaron el elemento de su ultima posicion
     #porque son construidas las {x1,x2,...,xi} con las {x1,x2,...,xi-1}
-    #y como estan ordenadas las encuentro iterando
+    #y como estan ordenadas las encuentro iterando,
+    #FALSO la L puede contener valores que no estaban en S originalmente
+    #ademas tampoco en el orden que se esperaria encontrarlos, eso seria
+    #regresar al problema de SubSetSum
     """
-    Osea los elementos de S original tendrian que haber estado en la
-    L final provacndo el maximo valor
+    A guardo la lista que provoca su clave, por lo tanto es
+    el valor del optimo sin el primer elemento de la lista
     """
-    Ld = L.copy() #para modificar a gusto
-    Ld.pop(0) #simepre es 0
-    t = Ld.pop()
-
-    Ls = [Ld[0]] #empezando con el primero
-    suma = Ls[0]
-    for i in range(1,len(Ld)):
-        if (suma + Ld[i]) <= t:
-            suma += Ld[i]
-            Ls.append(Ld[i])
-    return Ls
+    global A
+    track = A[z]
+    return track[1:] #todos menos el primero
 
 def da_arr_posi():
     """
@@ -204,13 +217,14 @@ def main():
     print(t,end=', ')
     print(e, end=' es:\n')
     res = APPROX_SUBSET_SUM(S,t,e)
-    print(res[0])
-    #print('Con el subconjunto que lo provoco: ', end='')
-    #print(recuperarD(res[-1]),end='suma = ')
-    #print(sum(recuperarD(res[-1])))
-    #print(res[-1])
-    #falto tiempo para resolver el 35.5-5
-main()
+    print(res)
+    print('(Resuelto el ejercicio 35.5-5 ;) )')
+    print('Con el subconjunto que lo provoco: ', end='')
+    subSum = recuperarD(res)
+    print(subSum, end='suma = ')
+    print(sum(subSum))
+    
+main() #dale
 
 
 
